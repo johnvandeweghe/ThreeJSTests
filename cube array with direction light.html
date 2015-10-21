@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>body, html { padding: 0px; margin: 0px;}canvas { width: 100%; height: 100%; margin: 0px; padding: 0px; }</style>
+	</head>
+	<body>
+		<script src="bower_components/three.js/build/three.min.js"></script>
+		<script src="bower_components/jquery/dist/jquery.min.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/window.innerHeight, 0.1, 41 );
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+			var cube = [];
+			for(var x = 0; x <= 10; x++){
+				cube[x] = [];
+
+				for(var y = 0; y <= 10; y++){
+					cube[x][y] = []
+					for(var i = 0; i <= 10; i++){
+						geometry = new THREE.BoxGeometry(1, 1, 1);
+						color = Math.random() * (255*255*255 - 150*150*150) + 150*150*150;
+						material = new THREE.MeshPhongMaterial( { ambient: 0x000000, color: color, specular: color, shininess: 30, shading: THREE.FlatShading } );
+						cube[x][y][i] = new THREE.Mesh( geometry, material );
+						cube[x][y][i].position.x = i*3;
+						cube[x][y][i].position.z = x*3;
+						cube[x][y][i].position.y = y*3;
+						scene.add( cube[x][y][i] );
+					}
+				}
+			}
+
+			var light = new THREE.SpotLight( 0xffffff, 1.0, 0.0, Math.PI/10);
+			light.position.y = 5;
+			light.position.z = 5;
+			// light.castShadow = true;
+			// light.shadowMapWidth = 1024;
+			// light.shadowMapHeight = 1024;
+			// light.shadowCameraNear = 500;
+			// light.shadowCameraFar = 4000;
+			// light.shadowCameraFov = 30;
+			light.target = camera;
+
+			scene.add(light);
+
+			camera.add(light);
+
+			camera.position.z = 5;
+
+			// camera.rotation.x = Math.PI * .5;
+			// camera.rotation.y = Math.PI * .5;
+
+			var render = function () {
+				requestAnimationFrame( render );
+
+				xOffset = 0;
+				zOffset = 0;
+
+				if(camera.rotation.y % 2*Math.PI != 0 && camera.rotation.y % Math.PI != 0)
+					xOffset = Math.sin(camera.rotation.y);
+				if(camera.rotation.y % Math.pi/2 != 0 && camera.rotation.y % 3*Math.PI/2 != 0)
+					zOffset = Math.cos(camera.rotation.y);
+
+				light.position.set(camera.position.x + xOffset, camera.position.y, camera.position.z + zOffset);
+
+				for(var key in keysPressed){
+					if(keysPressed[key]){
+						window[key]();
+					}
+				}
+
+				keys = [];
+
+				for (var key in keysPressed) {
+				    if (key === 'length' || !keysPressed.hasOwnProperty(key) || !keysPressed[key]) continue;
+				    keys.push(key);
+				}
+
+				$('#overlay').html("X: " + camera.position.x.toFixed(2) + " Y: " + camera.position.y.toFixed(2) + " Z: " + camera.position.z.toFixed(2) + " R: " + camera.rotation.y.toFixed(2) + "<br />X: " + light.position.x + " Y: " + light.position.y + " Z: " + light.position.z + "<br />Keys Pressed: " + keys);
+
+				renderer.render(scene, camera);
+			};
+
+			var up = function () {
+				if(camera.rotation.y != 0 && camera.rotation.y != Math.PI)
+					camera.position.x -= Math.sin(camera.rotation.y)/4;
+				if(camera.rotation.y != Math.PI/2 && camera.rotation.y != 3*Math.PI/2)
+					camera.position.z -= Math.cos(camera.rotation.y)/4;
+			}
+
+			var down = function () {
+				if(camera.rotation.y != 0 && camera.rotation.y != Math.PI)
+					camera.position.x += Math.sin(camera.rotation.y)/4;
+				if(camera.rotation.y != Math.pi/2 && camera.rotation.y != 3*Math.PI/2)
+					camera.position.z += Math.cos(camera.rotation.y)/4;
+			}
+
+			var left = function () {
+				theta2 = camera.rotation.y-Math.PI/2;
+				if(theta2 != 0 && theta2 != Math.PI)
+					camera.position.x += Math.sin(theta2)/4;
+				if(theta2 != Math.PI/2 && theta2 != 3*Math.PI/2)
+					camera.position.z += Math.cos(theta2)/4;
+			}
+
+			var right = function () {
+				theta2 = camera.rotation.y+Math.PI/2;
+				if(theta2 != 0 && theta2 != Math.PI)
+					camera.position.x += Math.sin(theta2)/4;
+				if(theta2 != Math.PI/2 && theta2 != 3*Math.PI/2)
+					camera.position.z += Math.cos(theta2)/4;
+			}
+
+			var tleft = function () {
+				camera.rotation.y += Math.PI * .0125;
+			}
+
+			var tright = function () {
+				camera.rotation.y -= Math.PI * .0125;
+			}
+
+			var vup = function(){
+				camera.position.y += .25;
+			}
+			var vdown = function(){
+				camera.position.y -= .25;
+			}
+
+			var keysPressed = {};
+
+			document.addEventListener('keydown', function(e){
+				console.log(e);
+				switch(e.keyCode){
+					case 87:
+						keysPressed.up = true;
+						break;
+					case 83:
+						keysPressed.down = true;
+						break;
+					case 65:
+						keysPressed.left = true;
+						break;
+					case 68:
+						keysPressed.right = true;
+						break;
+					case 81:
+						keysPressed.tleft = true;
+						break;
+					case 69:
+						keysPressed.tright = true;
+						break;
+					case 32:
+						keysPressed.vup = true;
+						e.preventDefault();
+						break;
+					case 16:
+						keysPressed.vdown = true;
+						e.preventDefault();
+						break;
+				}
+			});
+			document.addEventListener('keyup', function(e){
+				console.log(e);
+				switch(e.keyCode){
+					case 87:
+						keysPressed.up = false;
+						break;
+					case 83:
+						keysPressed.down = false;
+						break;
+					case 65:
+						keysPressed.left = false;
+						break;
+					case 68:
+						keysPressed.right = false;
+						break;
+					case 81:
+						keysPressed.tleft = false;
+						break;
+					case 69:
+						keysPressed.tright = false;
+						break;
+					case 32:
+						keysPressed.vup = false;
+						break;
+					case 16:
+						keysPressed.vdown = false;
+						break;
+				}
+			});
+
+			render();
+		</script>
+		<p style="position: absolute; top: 5px; left: 5px; color: #FF6666" id="overlay"></p>
+	</body>
+</html>

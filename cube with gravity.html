@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>body, html { padding: 0px; margin: 0px;}canvas { width: 100%; height: 100%; margin: 0px; padding: 0px; }</style>
+	</head>
+	<body>
+		<script src="bower_components/three.js/build/three.min.js"></script>
+		<script src="bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="js/Sim.js"></script>
+		<script src="js/Input.js"></script>
+		<script src="js/Object.js"></script>
+		<script>
+			var sim = new Sim();
+            sim.input.bindCamera();
+			var geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2);
+			var geometry2 = new THREE.BoxGeometry(10, 10, 10, 5, 5, 5);
+			var color = Math.random() * (255*255*255 - 150*150*150) + 150*150*150;
+			var color2 = Math.random() * (255*255*255 - 150*150*150) + 150*150*150;
+			var material = new THREE.MeshLambertMaterial( { ambient: 0xFFFFFF, emissive: 0, color: color, specular: 0, shininess: 30, shading: THREE.SmoothShading } );
+			var material2 = new THREE.MeshPhongMaterial( { ambient: 0xFFFFFF, emissive: 0, color: color2, specular: 0, shininess: 30, shading: THREE.SmoothShading } );
+			var ucm_cube = new THREE.Mesh( geometry, material );
+			ucm_cube.position.y = 10;
+			ucm_cube.position.x = 0;
+			ucm_cube.position.z = -20;
+			//new THREE.Vector3(Math.pow(10000*1/Math.pow(10,2) * 10, .5), 0, 0))
+			sim.addObject('ucm_cube', new Sim.Object(ucm_cube, 1, new THREE.Vector3(Math.pow(10000*1/Math.pow(10,2) * 10, .5), 0, 0)));
+			sim.trackObject('ucm_cube');
+			var static_cube = new THREE.Mesh( geometry2, material2 );
+			static_cube.position.y = 0;
+			static_cube.position.x = 0;
+			static_cube.position.z = -20;
+			sim.addObject('static_cube', new Sim.Object(static_cube, 10000));
+		</script>
+		<p style="position: absolute; top: 5px; left: 5px; color: #FF6666" id="overlay"></p>
+	</body>
+</html>
